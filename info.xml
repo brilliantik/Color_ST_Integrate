@@ -10,6 +10,7 @@
 		<file_name name="name_file_default.net">default.net</file_name> <!-- Название файла для считывания информации о сетке -->
 		<file_name name="name_file_result.fun">result.fun</file_name> <!-- Название файла для считывания информации о поле в узлах -->
 	</file_names>
+	<relative_path_for_save name="relative_path_for_save">C:\Stud\ST_LT\Color_ST_Integrate\</relative_path_for_save>
 	<folder_name_for_save>Result</folder_name_for_save> <!-- Название папки которая будет создана в директории relative_path-->
 	<file_names_for_save> <!-- Названия файлов для сохранения выходных или промежуточных данных -->
 		<file_name_save name="picture_SL">Pic_SL.png</file_name_save> <!-- Название файла для сохранения изображения с линиями тока -->

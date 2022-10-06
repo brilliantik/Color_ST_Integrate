@@ -46,8 +46,9 @@ def read_xml_config():
 	root = tree.getroot()
 	pixel_size = int(root.find('pixel_size').text)
 	relative_path = root.find('relative_path').text
+	relative_path_for_save = root.find('relative_path_for_save').text
 	folder_name = root.find('folder_name_for_save').text
-	path_save = relative_path + folder_name + '\\'
+	path_save = relative_path_for_save + folder_name + '\\'
 	path_file_names = [relative_path + file_name.text for file_name in root.find('file_names').findall('file_name')]
 	path_file_names_for_save = [path_save + file_names_for_save.text for file_names_for_save in root.find('file_names_for_save').findall('file_name_save')]
 	return Config(pixel_size, path_file_names, path_file_names_for_save)
@@ -110,16 +111,15 @@ def output_file(data):
 
 def main():
 	cfg = read_xml_config()
-	print('1')
-	# create_image()
-	# read_pic()
-	# read_ppwcac_info()
-	# read_mesh()
-	# read_field()
-	# init_j()
-	# init_color_to_vert()
-	# output_info = integrate_by_st(grid, clr, jac)
-	# output_file(output_info)
+	create_image()
+	read_pic()
+	read_ppwcac_info()
+	read_mesh()
+	read_field()
+	init_j()
+	init_color_to_vert()
+	output_info = integrate_by_st(grid, clr, jac)
+	output_file(output_info)
 
 
 if __name__ == '__main__':
