@@ -1,0 +1,33 @@
+import numpy as np
+
+
+def integral_jacob(grid, field):
+	j = np.zeros(grid.Nelem)
+	for i in range(grid.Nelem):
+		x1 = grid.vert[grid.elem_vert[i][0]][0]
+		y1 = grid.vert[grid.elem_vert[i][0]][1]
+		x2 = grid.vert[grid.elem_vert[i][1]][0]
+		y2 = grid.vert[grid.elem_vert[i][1]][1]
+		x3 = grid.vert[grid.elem_vert[i][2]][0]
+		y3 = grid.vert[grid.elem_vert[i][2]][1]
+		f = (field[grid.elem_vert[i][0]] + field[grid.elem_vert[i][1]] + field[grid.elem_vert[i][2]]) / 3
+		j[i] = ((x2 - x1) * (y3 - y1) - (x3 - x1) * (y2 - y1)) * f / 2
+	return j
+
+
+def integrate_by_st(grid, color, jacob):
+	integral_color = np.zeros(len(color))
+
+	for i in range(grid.Nelem):
+		for j in range(grid.elem_nvert[i]):
+			for k in range(len(color)):
+				if grid.vert_color[grid.elem_vert[i][j]] == list(color[k].color):
+					integral_color[k] = integral_color[k] + jacob[i] / 3
+
+	return integral_color
+
+
+if __name__ == '__main__':
+	raise SystemExit("IntegratorST.py это не основное приложение!")
+else:
+	print('IntegratorST.py Используется как библиотека!')
