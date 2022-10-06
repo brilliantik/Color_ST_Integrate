@@ -1,4 +1,4 @@
-import sys
+# import sys
 import os
 import numpy as np
 from PIL import Image, ImageDraw
@@ -8,6 +8,9 @@ path_well_info = ''
 path_bound = ''
 path_sl_info = ''
 path_save = ''
+path_save_SL = ''
+path_save_ST = ''
+path_folder = ''
 pixel_max = int(-999999)
 well_size = int(-999999)
 xy_well_info = []
@@ -63,6 +66,22 @@ class SL:
 		self.FT = None
 
 
+class Config:
+	def __init__(self, pixel, path_file_names, path_file_names_for_save, path_folder):
+		self.pixel_size = pixel
+		self.path_default_wells_dat = path_file_names[0]
+		self.path_result_wll = path_file_names[1]
+		self.path_default_con = path_file_names[2]
+		self.path_SLsReg_auto_txt = path_file_names[3]
+		self.path_default_net = path_file_names[4]
+		self.path_result_fun = path_file_names[5]
+		self.path_save_picture_SL = path_file_names_for_save[0]
+		self.path_save_picture_ST = path_file_names_for_save[1]
+		self.path_save_color_and_conn_info = path_file_names_for_save[2]
+		self.path_save_st_Well_From_To_colorRGB_value = path_file_names_for_save[3]
+		self.path_folder_save = path_folder
+
+
 def normal_line(x1, y1, x2, y2):
 	p = 2
 	xc = (x2 + x1) / 2
@@ -92,17 +111,26 @@ def init_pixel_size():
 	pixel_max = int(1000)
 
 
-def init_path_from_cfg():
-	global path_well_size, path_well_info, path_bound, path_sl_info, path_save
+def init_path_from_cfg(cfg: Config):
+	global path_well_size, path_well_info, path_bound, path_sl_info
+	global path_folder, path_save, path_save_SL, path_save_ST
 
-	path_cfg = sys.argv[1]
-	paths = open(path_cfg, 'r').readlines()
+	# path_cfg = sys.argv[1]
+	# paths = open(path_cfg, 'r').readlines()
 
-	path_well_size = paths[0].rstrip()
-	path_well_info = paths[1].rstrip()
-	path_bound = paths[2].rstrip()
-	path_sl_info = paths[3].rstrip()
-	path_save = paths[4].rstrip()
+	# path_well_size = paths[0].rstrip()
+	# path_well_info = paths[1].rstrip()
+	# path_bound = paths[2].rstrip()
+	# path_sl_info = paths[3].rstrip()
+	# path_save = paths[4].rstrip()
+	path_well_size = cfg.path_default_wells_dat
+	path_well_info = cfg.path_result_wll
+	path_bound = cfg.path_default_con
+	path_sl_info = cfg.path_SLsReg_auto_txt
+	path_save = cfg.path_save_color_and_conn_info
+	path_save_SL = cfg.path_save_picture_SL
+	path_save_ST = cfg.path_save_picture_ST
+	path_folder = cfg.path_folder_save
 
 
 def init_well_info():
@@ -175,9 +203,9 @@ def init_well_ellipse_info():
 
 	xy_well_ellipse_array = \
 		[((xy_well_info[i].x - xy_well_info[i].r - x_0) * (pixel_max - 1) / norm_xy,
-			(xy_well_info[i].y - xy_well_info[i].r - y_0) * (pixel_max - 1) / norm_xy,
-			(xy_well_info[i].x + xy_well_info[i].r - x_0) * (pixel_max - 1) / norm_xy,
-			(xy_well_info[i].y + xy_well_info[i].r - y_0) * (pixel_max - 1) / norm_xy) for i in range(well_size)]
+		  (xy_well_info[i].y - xy_well_info[i].r - y_0) * (pixel_max - 1) / norm_xy,
+		  (xy_well_info[i].x + xy_well_info[i].r - x_0) * (pixel_max - 1) / norm_xy,
+		  (xy_well_info[i].y + xy_well_info[i].r - y_0) * (pixel_max - 1) / norm_xy) for i in range(well_size)]
 
 
 def init_sl_info():
@@ -194,7 +222,7 @@ def init_sl_info():
 		sl = SL(sl_file_input)
 		sl.xy = \
 			[((float(sl_file[2 + num + i + j].split()[0]) - x_0) * (pixel_max - 1) / norm_xy,
-				(float(sl_file[2 + num + i + j].split()[1]) - y_0) * (pixel_max - 1) / norm_xy) for j in range(sl.Np)]
+			  (float(sl_file[2 + num + i + j].split()[1]) - y_0) * (pixel_max - 1) / norm_xy) for j in range(sl.Np)]
 		num += sl.Np
 		fft.append((sl.WellFrom, sl.WellTo))
 		sl.FT = [sl.WellFrom, sl.WellTo]
@@ -220,6 +248,8 @@ def init_nonrepeating_color():
 		color = list(np.random.choice(range(255), size = 3))
 		color256.append((color[0], color[1], color[2]))
 		clr = list(set(color256))
+
+
 # Можно исправить будет цветастая картинка, но не факт что хватит цветов
 
 
@@ -274,15 +304,15 @@ def create_st():
 
 	create_sl()
 	create_well((0, 0, 0))
-	# font = ImageFont.truetype("Fonts/times.ttf", int(pixel_max / 20))
-	# for i in range(well_size):
-	# 	idraw.text(xy_point[i], xy_well_info[i].name, font = font, fill = 'white')  # названия скважин
 
 
-def path_pic_well_conn_and_color_info():
-	file = open(path_save + 'Result\\' + 'ppwcac_info.txt', 'w')
-	file.write('###' + '\t' + 'Path .png file' + '\t' + '###' + '\n')
-	file.write(path_save + 'Result\\' + 'Pic_ST.png' + '\n')
+# font = ImageFont.truetype("Fonts/times.ttf", int(pixel_max / 20))
+# for i in range(well_size):
+# 	idraw.text(xy_point[i], xy_well_info[i].name, font = font, fill = 'white')  # названия скважин
+
+
+def path_pic_well_conn_and_color_info(path):
+	file = open(path, 'w')
 	file.write('###' + '\t' + 'Wells connection(color) info' + '\t' + '###' + '\n')
 	file.write('Size' + '\t' + str(len(clr) + 2) + '\n')
 	file.write('#Color            #Connection' + '\n')
@@ -293,17 +323,17 @@ def path_pic_well_conn_and_color_info():
 		file.write('\n')
 
 
-def get_params():
+def get_params(config):
 	init_pixel_size()
-	init_path_from_cfg()
+	init_path_from_cfg(config)
 	init_bound_info()
 	return [pixel_max, x_0, y_0, norm_xy]
 
 
-def create_image():
+def create_image(config):
 	global img, idraw
 	init_pixel_size()
-	init_path_from_cfg()
+	init_path_from_cfg(config)
 	init_well_info()
 	init_bound_info()
 	init_well_ellipse_info()
@@ -313,13 +343,13 @@ def create_image():
 	create_sl()
 	create_well((0, 0, 0))
 	img.show()
-	if not os.path.isdir(path_save + 'Result'):
-		os.mkdir(path_save + 'Result')
-	img.save(path_save + 'Result\\' + 'Pic_SL.png')
+	if not os.path.isdir(path_folder):
+		os.mkdir(path_folder)
+	img.save(path_save_SL)
 	create_st()
 	img.show()
-	img.save(path_save + 'Result\\' + 'Pic_ST.png')
-	path_pic_well_conn_and_color_info()
+	img.save(path_save_ST)
+	path_pic_well_conn_and_color_info(path_save)
 
 
 if __name__ == '__main__':

@@ -4,12 +4,7 @@ from grid import *
 from FemFrameTool import read_fun
 from IntegratorST import integral_jacob, integrate_by_st
 from ImageCreate import create_image
-
-grid = None
-field = None
-jac = None
-pic = None
-clr = []
+import sys
 
 
 class Color:
@@ -26,7 +21,7 @@ class Color:
 
 
 class Config:
-	def __init__(self, pixel, path_file_names, path_file_names_for_save):
+	def __init__(self, pixel, path_file_names, path_file_names_for_save, path_folder):
 		self.pixel_size = pixel
 		self.path_default_wells_dat = path_file_names[0]
 		self.path_result_wll = path_file_names[1]
@@ -38,10 +33,20 @@ class Config:
 		self.path_save_picture_ST = path_file_names_for_save[1]
 		self.path_save_color_and_conn_info = path_file_names_for_save[2]
 		self.path_save_st_Well_From_To_colorRGB_value = path_file_names_for_save[3]
+		self.path_folder_save = path_folder
+
+
+grid = None
+field = None
+jac = None
+pic = None
+clr = []
+cfg: Config
 
 
 def read_xml_config():
-	path_xml_file = 'info.xml'
+	global cfg
+	path_xml_file = sys.argv[1]
 	tree = ET.parse(path_xml_file)
 	root = tree.getroot()
 	pixel_size = int(root.find('pixel_size').text)
@@ -50,40 +55,35 @@ def read_xml_config():
 	folder_name = root.find('folder_name_for_save').text
 	path_save = relative_path_for_save + folder_name + '\\'
 	path_file_names = [relative_path + file_name.text for file_name in root.find('file_names').findall('file_name')]
-	path_file_names_for_save = [path_save + file_names_for_save.text for file_names_for_save in root.find('file_names_for_save').findall('file_name_save')]
-	return Config(pixel_size, path_file_names, path_file_names_for_save)
+	path_file_names_for_save = [
+		path_save + file_names_for_save.text for file_names_for_save in
+		root.find('file_names_for_save').findall('file_name_save')]
+	cfg = Config(pixel_size, path_file_names, path_file_names_for_save, path_save)
 
 
-def read_pic():
+def read_pic(path):
 	global pic
-
-	path_pic = r'C:\Stud\ST_LT\Color_ST_Integrate\Result\Pic_ST.png'
-	pic = Image.open(path_pic)
+	pic = Image.open(path)
 
 
-def read_ppwcac_info():
+def read_ppwcac_info(path):
 	global clr
 
-	path_ppwcfc_file = r'C:\Stud\ST_LT\Color_ST_Integrate\Result\ppwcac_info.txt'
-	ppwcfc_file = open(path_ppwcfc_file, 'r').readlines()
-	ncolor = int(ppwcfc_file[3].split()[1])
+	ppwcfc_file = open(path, 'r').readlines()
+	ncolor = int(ppwcfc_file[1].split()[1])
 	clr = np.zeros(ncolor, dtype = Color)
 	for i in range(ncolor):
-		clr[i] = Color(ppwcfc_file[i + 5].split('\t'))
+		clr[i] = Color(ppwcfc_file[i + 3].split('\t'))
 
 
-def read_mesh():
+def read_mesh(path):
 	global grid
-
-	path_mesh = r'C:\Stud\ST_LT\SL_ST_EXAMPLE\Ex2\default.net'
-	grid = gu_build_from_net(path_mesh)
+	grid = gu_build_from_net(path)
 
 
-def read_field():
+def read_field(path):
 	global field
-
-	path_field = r'C:\Stud\ST_LT\SL_ST_EXAMPLE\Ex2\result.fun'
-	field = read_fun(path_field)
+	field = read_fun(path)
 
 
 def init_j():
@@ -93,11 +93,11 @@ def init_j():
 
 
 def init_color_to_vert():
-	assigment_color_to_vert(grid, pic)
+	assigment_color_to_vert(grid, pic, cfg)
 
 
-def output_file(data):
-	file = open(r'C:\Stud\ST_LT\Color_ST_Integrate\Result\st_ft_color_value.txt', 'w')
+def output_file(data, path):
+	file = open(path, 'w')
 	file.write(
 		'###' + '\t' + 'st_number' + '\t' + 'Well_From' + '\t' + 'Well_To' + '\t' + 'Color_R' + '\t' + 'Color_G' + '\t'
 		+ 'Color_B' + '\t' + 'value' + '\n')
@@ -110,16 +110,16 @@ def output_file(data):
 
 
 def main():
-	cfg = read_xml_config()
-	create_image()
-	read_pic()
-	read_ppwcac_info()
-	read_mesh()
-	read_field()
+	read_xml_config()
+	create_image(cfg)
+	read_pic(cfg.path_save_picture_ST)
+	read_ppwcac_info(cfg.path_save_color_and_conn_info)
+	read_mesh(cfg.path_default_net)
+	read_field(cfg.path_result_fun)
 	init_j()
 	init_color_to_vert()
 	output_info = integrate_by_st(grid, clr, jac)
-	output_file(output_info)
+	output_file(output_info, cfg.path_save_st_Well_From_To_colorRGB_value)
 
 
 if __name__ == '__main__':

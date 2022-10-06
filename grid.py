@@ -303,8 +303,8 @@ def find_elem(grid: Grid, point: np.ndarray) -> int:
 	raise Exception(f'Вы вышли за пределы расчетной области: точка {point}')
 
 
-def assigment_color_to_vert(grid, img):
-	p = get_params()
+def assigment_color_to_vert(grid, img, config):
+	p = get_params(config)
 	pixel_max = int(p[0])
 	x_0 = float(p[1])
 	y_0 = float(p[2])
