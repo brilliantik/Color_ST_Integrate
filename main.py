@@ -1,3 +1,4 @@
+import xml.etree.ElementTree as ET
 from PIL import Image
 from grid import *
 from FemFrameTool import read_fun
@@ -22,6 +23,34 @@ class Color:
 		f = int(d[0])
 		t = int(d[1])
 		self.ft = (f, t)
+
+
+class Config:
+	def __init__(self, pixel, path_file_names, path_file_names_for_save):
+		self.pixel_size = pixel
+		self.path_default_wells_dat = path_file_names[0]
+		self.path_result_wll = path_file_names[1]
+		self.path_default_con = path_file_names[2]
+		self.path_SLsReg_auto_txt = path_file_names[3]
+		self.path_default_net = path_file_names[4]
+		self.path_result_fun = path_file_names[5]
+		self.path_save_picture_SL = path_file_names_for_save[0]
+		self.path_save_picture_ST = path_file_names_for_save[1]
+		self.path_save_color_and_conn_info = path_file_names_for_save[2]
+		self.path_save_st_Well_From_To_colorRGB_value = path_file_names_for_save[3]
+
+
+def read_xml_config():
+	path_xml_file = 'info.xml'
+	tree = ET.parse(path_xml_file)
+	root = tree.getroot()
+	pixel_size = int(root.find('pixel_size').text)
+	relative_path = root.find('relative_path').text
+	folder_name = root.find('folder_name_for_save').text
+	path_save = relative_path + folder_name + '\\'
+	path_file_names = [relative_path + file_name.text for file_name in root.find('file_names').findall('file_name')]
+	path_file_names_for_save = [path_save + file_names_for_save.text for file_names_for_save in root.find('file_names_for_save').findall('file_name_save')]
+	return Config(pixel_size, path_file_names, path_file_names_for_save)
 
 
 def read_pic():
@@ -80,15 +109,17 @@ def output_file(data):
 
 
 def main():
-	create_image()
-	read_pic()
-	read_ppwcac_info()
-	read_mesh()
-	read_field()
-	init_j()
-	init_color_to_vert()
-	output_info = integrate_by_st(grid, clr, jac)
-	output_file(output_info)
+	cfg = read_xml_config()
+	print('1')
+	# create_image()
+	# read_pic()
+	# read_ppwcac_info()
+	# read_mesh()
+	# read_field()
+	# init_j()
+	# init_color_to_vert()
+	# output_info = integrate_by_st(grid, clr, jac)
+	# output_file(output_info)
 
 
 if __name__ == '__main__':

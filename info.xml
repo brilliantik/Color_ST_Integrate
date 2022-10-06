@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<config>
+	<pixel_size>1000</pixel_size> <!-- Максимальное кол-во пикселей по большей стороне изображения -->
+	<relative_path name="relative_path_for_files">C:\Stud\ST_LT\SL_ST_EXAMPLE\Ex2\</relative_path> <!-- Относительный путь из которого будут считываться файлы из file_names -->
+	<file_names> <!-- Названия файлов для считывания -->
+		<file_name name="name_file_default_wells.dat">default_wells.dat</file_name> <!-- Название файла для считывания кол-ва скважин -->
+		<file_name name="name_file_result.wll">result.wll</file_name> <!-- Название файла для считывания координат отнесенным к узлам сетки -->
+		<file_name name="name_file_default.con">default.con</file_name> <!-- Название файла для считывания координат контура -->
+		<file_name name="name_file_SLsReg_auto.txt">SL_ST_PROD\SLsReg_auto.txt</file_name> <!-- Название файла для считывания информации о линиях тока -->
+		<file_name name="name_file_default.net">default.net</file_name> <!-- Название файла для считывания информации о сетке -->
+		<file_name name="name_file_result.fun">result.fun</file_name> <!-- Название файла для считывания информации о поле в узлах -->
+	</file_names>
+	<folder_name_for_save>Result</folder_name_for_save> <!-- Название папки которая будет создана в директории relative_path-->
+	<file_names_for_save> <!-- Названия файлов для сохранения выходных или промежуточных данных -->
+		<file_name_save name="picture_SL">Pic_SL.png</file_name_save> <!-- Название файла для сохранения изображения с линиями тока -->
+		<file_name_save name="picture_ST">Pic_ST.png</file_name_save> <!-- Название файла для сохранения изображения с трубками тока(ТТ) -->
+		<file_name_save name="color_and_conn_info">ppwcac_info.txt</file_name_save> <!-- Название файла для сохранения зависимости цвета и взаимодействующих скважин WellFrom -> WellTo -->
+		<file_name_save name="st_Well_From_To_colorRGB_value">st_ft_color_value.txt</file_name_save> <!-- Название файла для сохранения №ТТ WellFrom WellTo Color_R Color_G Color_B value-->
+	</file_names_for_save>
+</config>
