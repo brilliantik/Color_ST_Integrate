@@ -201,11 +201,11 @@ def init_bound_info():
 def init_well_ellipse_info():
 	global xy_well_ellipse_array
 
-	xy_well_ellipse_array = \
-		[((xy_well_info[i].x - xy_well_info[i].r - x_0) * (pixel_max - 1) / norm_xy,
-		  (xy_well_info[i].y - xy_well_info[i].r - y_0) * (pixel_max - 1) / norm_xy,
-		  (xy_well_info[i].x + xy_well_info[i].r - x_0) * (pixel_max - 1) / norm_xy,
-		  (xy_well_info[i].y + xy_well_info[i].r - y_0) * (pixel_max - 1) / norm_xy) for i in range(well_size)]
+	xy_well_ellipse_array = [
+		((xy_well_info[i].x - xy_well_info[i].r - x_0) * (pixel_max - 1) / norm_xy,
+			(xy_well_info[i].y - xy_well_info[i].r - y_0) * (pixel_max - 1) / norm_xy,
+			(xy_well_info[i].x + xy_well_info[i].r - x_0) * (pixel_max - 1) / norm_xy,
+			(xy_well_info[i].y + xy_well_info[i].r - y_0) * (pixel_max - 1) / norm_xy) for i in range(well_size)]
 
 
 def init_sl_info():
@@ -220,9 +220,9 @@ def init_sl_info():
 	for i in range(n_sl):
 		sl_file_input = sl_file[1 + num + i].split()
 		sl = SL(sl_file_input)
-		sl.xy = \
-			[((float(sl_file[2 + num + i + j].split()[0]) - x_0) * (pixel_max - 1) / norm_xy,
-			  (float(sl_file[2 + num + i + j].split()[1]) - y_0) * (pixel_max - 1) / norm_xy) for j in range(sl.Np)]
+		sl.xy = [
+			((float(sl_file[2 + num + i + j].split()[0]) - x_0) * (pixel_max - 1) / norm_xy,
+				(float(sl_file[2 + num + i + j].split()[1]) - y_0) * (pixel_max - 1) / norm_xy) for j in range(sl.Np)]
 		num += sl.Np
 		fft.append((sl.WellFrom, sl.WellTo))
 		sl.FT = [sl.WellFrom, sl.WellTo]
