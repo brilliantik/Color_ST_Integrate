@@ -259,9 +259,10 @@ def init_nonrepeating_color():
 def create_rectangle():
 	global img, idraw
 	dobavok = 1
-	img = Image.new('RGB', (int(lx_norm * pixel_max) + dobavok, int(ly_norm * pixel_max) + dobavok), 'white')
+	img = Image.new('RGB', (int(lx_norm * pixel_max) + dobavok, int(ly_norm * pixel_max) + dobavok), (0, 0, 1))
 	idraw = ImageDraw.Draw(img)
-	idraw.line(xy_bound_array, fill = 'black', width = 1)
+	# idraw.line(xy_bound_array, fill = 'black', width = 1)
+	idraw.polygon(xy_bound_array, fill = (255, 255, 255), outline = (0, 0, 0))
 
 
 def create_well(color):
@@ -278,7 +279,7 @@ def create_sl():
 
 def create_st():
 	global idraw
-	sl_color = (0, 0, 1)
+	sl_color = (0, 0, 2)
 	for i in range(n_sl):
 		for j in range(len(ft)):
 			idraw.line(sl_info[i].xy, fill = sl_color)
@@ -317,9 +318,10 @@ def create_st():
 def path_pic_well_conn_and_color_info(path):
 	file = open(path, 'w')
 	file.write('###' + '\t' + 'Wells connection(color) info' + '\t' + '###' + '\n')
-	file.write('Size' + '\t' + str(len(clr) + 2) + '\n')
+	file.write('Size' + '\t' + str(len(clr) + 3) + '\n')
 	file.write('#Color            #Connection' + '\n')
 	file.write('{:<15}'.format('(0, 0, 0)') + '\t' + '{:<15}'.format('(-999999999, -999999999)') + '\n')
+	file.write('{:<15}'.format('(0, 0, 1)') + '\t' + '{:<15}'.format('(+999999999, -999999999)') + '\n')
 	file.write('{:<15}'.format('(255, 255, 255)') + '\t' + '{:<15}'.format('(+999999999, +999999999)') + '\n')
 	for i in range(len(clr)):
 		file.write('{:<15}'.format(str(clr[i])) + '\t' + '{:<15}'.format(str(ft[i])))
