@@ -28,6 +28,16 @@ def read_fun(path_file):
 	return np.array(field)
 
 
+def read_vel(path_file):
+	file_field = open(path_file, 'r').readlines()
+	# field = [[float(file_field[i].split()[0]), float(file_field[i].split()[1])] for i in range(len(file_field))]
+	field = [
+		np.sqrt(float(file_field[i].split()[0]) * float(file_field[i].split()[0]) +
+					float(file_field[i].split()[1]) * float(file_field[i].split()[1]))
+						for i in range(len(file_field))]
+	return field
+
+
 # Saving grid with data field in .vtk format from .net
 def save_vtk(path_save, grid, data):
 	file = open(path_save, 'w')

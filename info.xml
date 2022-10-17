@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <config>
 	<pixel_size>1000</pixel_size> <!-- Максимальное кол-во пикселей по большей стороне изображения -->
+	<ku>0.1</ku><!-- Коэффициент для подсчета u* = ku * mediane(u)  -->
 	<relative_path name="relative_path_for_files">C:\Stud\ST_LT\SL_ST_EXAMPLE\Ex2\</relative_path> <!-- Относительный путь из которого будут считываться файлы из file_names -->
 	<file_names> <!-- Названия файлов для считывания -->
 		<file_name name="name_file_default_wells.dat">default_wells.dat</file_name> <!-- Название файла для считывания кол-ва скважин -->
@@ -9,6 +10,7 @@
 		<file_name name="name_file_SLsReg_auto.txt">SL_ST_PROD\SLsReg_auto.txt</file_name> <!-- Название файла для считывания информации о линиях тока -->
 		<file_name name="name_file_default.net">default.net</file_name> <!-- Название файла для считывания информации о сетке -->
 		<file_name name="name_file_result.fun">result.fun</file_name> <!-- Название файла для считывания информации о поле в узлах -->
+		<file_name name="name_file_resvelo.vel">resvelo.vel</file_name> <!-- Название файла для считывания информации о поле в конечных эдементах -->
 	</file_names>
 	<relative_path_for_save name="relative_path_for_save">C:\Stud\ST_LT\Color_ST_Integrate\</relative_path_for_save>
 	<folder_name_for_save>Result</folder_name_for_save> <!-- Название папки которая будет создана в директории relative_path-->

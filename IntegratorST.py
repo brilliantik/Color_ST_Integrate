@@ -14,7 +14,7 @@ def integral_jacob(grid):
 	return j
 
 
-def integrate_by_st(grid, color, jacob, field):
+def integrate_by_st_vert(grid, color, jacob, field):
 	integral_color = np.zeros(len(color))
 
 	for i in range(grid.Nelem):
@@ -23,6 +23,21 @@ def integrate_by_st(grid, color, jacob, field):
 				if grid.vert_color[grid.elem_vert[i][j]] == list(color[k].color):
 					f = (field[grid.elem_vert[i][0]] + field[grid.elem_vert[i][1]] + field[grid.elem_vert[i][2]]) / 3
 					integral_color[k] = integral_color[k] + (jacob[i] * f) / 3
+
+	return integral_color
+
+
+def integrate_by_st_vem(grid, color, jacob, field, field_u, ku):
+	integral_color = np.zeros(len(color))
+	for i in range(grid.Nelem):
+		if field_u[i] - ku * np.median(field_u) > 0:
+			for j in range(grid.elem_nvert[i]):
+				for k in range(len(color)):
+					if grid.vert_color[grid.elem_vert[i][j]] == list(color[k].color):
+						f = (field[grid.elem_vert[i][0]] + field[grid.elem_vert[i][1]] + field[grid.elem_vert[i][2]]) / 3
+						integral_color[k] = integral_color[k] + (jacob[i] * f) / 3
+		else:
+			continue
 
 	return integral_color
 

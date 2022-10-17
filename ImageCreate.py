@@ -67,7 +67,7 @@ class SL:
 
 
 class Config:
-	def __init__(self, pixel, path_file_names, path_file_names_for_save, path_folder_save, path_relative_folder):
+	def __init__(self, pixel, path_file_names, path_file_names_for_save, path_folder_save, path_relative_folder, kku):
 		self.pixel_size = pixel
 		self.path_default_wells_dat = path_file_names[0]
 		self.path_result_wll = path_file_names[1]
@@ -75,12 +75,14 @@ class Config:
 		self.path_SLsReg_auto_txt = path_file_names[3]
 		self.path_default_net = path_file_names[4]
 		self.path_result_fun = path_file_names[5]
+		self.path_resvelo_vel = path_file_names[6]
 		self.path_save_picture_SL = path_file_names_for_save[0]
 		self.path_save_picture_ST = path_file_names_for_save[1]
 		self.path_save_color_and_conn_info = path_file_names_for_save[2]
 		self.path_save_st_Well_From_To_colorRGB_value = path_file_names_for_save[3]
 		self.path_folder_save = path_folder_save
 		self.path_relative_folder = path_relative_folder
+		self.ku = kku
 
 
 def normal_line(x1, y1, x2, y2):
