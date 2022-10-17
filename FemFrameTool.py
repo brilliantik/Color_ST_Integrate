@@ -23,9 +23,9 @@ def read_net(path_mesh) -> tuple[ndarray, list[tuple[int, int, int]]]:
 # Reading field from .fun format
 def read_fun(path_file):
 	file_field = open(path_file, 'r').readlines()
-	field = [float(file_field[i].split()[0]) for i in range(len(file_field))]
-	# field = [float(1) for i in range(len(file_field))]
-	return field
+	# field = [float(file_field[i].split()[0]) for i in range(len(file_field))]
+	field = [float(1) for i in range(len(file_field))]
+	return np.array(field)
 
 
 # Saving grid with data field in .vtk format from .net

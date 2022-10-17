@@ -6,6 +6,7 @@ from grid import *
 from FemFrameTool import read_fun
 from IntegratorST import integral_jacob, integrate_by_st
 from ImageCreate import create_image, Config
+from CalcParam import *
 import sys
 
 
@@ -44,7 +45,7 @@ def read_xml_config():
 	path_file_names_for_save = [
 		path_save + file_names_for_save.text for file_names_for_save in
 		root.find('file_names_for_save').findall('file_name_save')]
-	cfg = ImageCreate.Config(pixel_size, path_file_names, path_file_names_for_save, path_save)
+	cfg = ImageCreate.Config(pixel_size, path_file_names, path_file_names_for_save, path_save, relative_path)
 
 
 def read_pic(path):
@@ -104,6 +105,7 @@ def main():
 	read_field(cfg.path_result_fun)
 	init_j()
 	init_color_to_vert()
+	ddd = calc_current_store_oil_field(cfg.path_relative_folder)
 	output_info = integrate_by_st(grid, clr, jac)
 	output_file(output_info, cfg.path_save_st_Well_From_To_colorRGB_value)
 
