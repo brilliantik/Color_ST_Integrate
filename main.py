@@ -76,7 +76,7 @@ def read_field(path):
 def init_j():
 	global jac
 
-	jac = integral_jacob(grid, field)
+	jac = integral_jacob(grid)
 
 
 def init_color_to_vert():
@@ -106,7 +106,7 @@ def main():
 	init_j()
 	init_color_to_vert()
 	ddd = calc_current_store_oil_field(cfg.path_relative_folder)
-	output_info = integrate_by_st(grid, clr, jac)
+	output_info = integrate_by_st(grid, clr, jac, field)
 	output_file(output_info, cfg.path_save_st_Well_From_To_colorRGB_value)
 
 

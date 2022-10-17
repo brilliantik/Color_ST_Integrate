@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def integral_jacob(grid, field):
+def integral_jacob(grid):
 	j = np.zeros(grid.Nelem)
 	for i in range(grid.Nelem):
 		x1 = grid.vert[grid.elem_vert[i][0]][0]
@@ -10,19 +10,19 @@ def integral_jacob(grid, field):
 		y2 = grid.vert[grid.elem_vert[i][1]][1]
 		x3 = grid.vert[grid.elem_vert[i][2]][0]
 		y3 = grid.vert[grid.elem_vert[i][2]][1]
-		f = (field[grid.elem_vert[i][0]] + field[grid.elem_vert[i][1]] + field[grid.elem_vert[i][2]]) / 3
-		j[i] = ((x2 - x1) * (y3 - y1) - (x3 - x1) * (y2 - y1)) * f / 2
+		j[i] = ((x2 - x1) * (y3 - y1) - (x3 - x1) * (y2 - y1)) / 2
 	return j
 
 
-def integrate_by_st(grid, color, jacob):
+def integrate_by_st(grid, color, jacob, field):
 	integral_color = np.zeros(len(color))
 
 	for i in range(grid.Nelem):
 		for j in range(grid.elem_nvert[i]):
 			for k in range(len(color)):
 				if grid.vert_color[grid.elem_vert[i][j]] == list(color[k].color):
-					integral_color[k] = integral_color[k] + jacob[i] / 3
+					f = (field[grid.elem_vert[i][0]] + field[grid.elem_vert[i][1]] + field[grid.elem_vert[i][2]]) / 3
+					integral_color[k] = integral_color[k] + (jacob[i] * f) / 3
 
 	return integral_color
 
