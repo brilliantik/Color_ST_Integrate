@@ -2,7 +2,12 @@
 import os
 import numpy as np
 from PIL import Image, ImageDraw
+from GeneralClassAndFunction import Config
+from GeneralClassAndFunction import read_xml_config
+import time
 
+
+Image.MAX_IMAGE_PIXELS = None
 path_well_size = ''
 path_well_info = ''
 path_bound = ''
@@ -28,6 +33,8 @@ fft = []
 clr = ''
 img = Image.new('RGB', (1, 1))
 idraw = ImageDraw.Draw(img)
+nx_pixel_max = int(-999999)
+ny_pixel_max = int(-999999)
 
 
 class Well:
@@ -41,6 +48,12 @@ class Well:
 		self.press = float(st[6])
 		self.rate = float(st[7])
 		self.index = None
+		if self.rate < 0:
+			self.type = 'producer'
+		elif self.rate > 0:
+			self.type = 'injection'
+		elif self.rate == 0:
+			self.type = 'no_working'
 
 
 class Coord:
@@ -51,14 +64,21 @@ class Coord:
 
 class SL:
 	def __init__(self, st):
-		# self.WellFrom = int(st[1])
-		# self.WellTo = int(st[2])
-		if int(st[1]) > int(st[2]):
-			self.WellFrom = int(st[2])
-			self.WellTo = int(st[1])
-		elif int(st[1]) < int(st[2]):
-			self.WellFrom = int(st[1])
-			self.WellTo = int(st[2])
+
+		# if int(st[1]) > int(st[2]):
+		# 	self.WellFrom = int(st[2])
+		# 	self.WellTo = int(st[1])
+		# elif int(st[1]) < int(st[2]):
+		# 	self.WellFrom = int(st[1])
+		# 	self.WellTo = int(st[2])
+		self.WellFrom = int(st[1])
+		self.WellTo = int(st[2])
+
+		if self.WellFrom != -1:
+			self.WellFrom = self.WellFrom - 1
+		if self.WellTo != -1:
+			self.WellTo = self.WellTo - 1
+
 		self.Np = int(st[3])
 		self.index = int(st[4])
 		self.xy = None
@@ -66,27 +86,8 @@ class SL:
 		self.FT = None
 
 
-class Config:
-	def __init__(self, pixel, path_file_names, path_file_names_for_save, path_folder_save, path_relative_folder, kku):
-		self.pixel_size = pixel
-		self.path_default_wells_dat = path_file_names[0]
-		self.path_result_wll = path_file_names[1]
-		self.path_default_con = path_file_names[2]
-		self.path_SLsReg_auto_txt = path_file_names[3]
-		self.path_default_net = path_file_names[4]
-		self.path_result_fun = path_file_names[5]
-		self.path_resvelo_vel = path_file_names[6]
-		self.path_save_picture_SL = path_file_names_for_save[0]
-		self.path_save_picture_ST = path_file_names_for_save[1]
-		self.path_save_color_and_conn_info = path_file_names_for_save[2]
-		self.path_save_st_Well_From_To_colorRGB_value = path_file_names_for_save[3]
-		self.path_folder_save = path_folder_save
-		self.path_relative_folder = path_relative_folder
-		self.ku = kku
-
-
 def normal_line(x1, y1, x2, y2):
-	p = 2
+	p = 1.5  # 1 or 2 or 1.5
 	xc = (x2 + x1) / 2
 	yc = (y2 + y1) / 2
 	dx = x2 - x1
@@ -108,10 +109,9 @@ def normal_line(x1, y1, x2, y2):
 	return [p_plus, p_minus]
 
 
-def init_pixel_size():
+def init_pixel_size(cfg: Config):
 	global pixel_max
-
-	pixel_max = int(1000)
+	pixel_max = int(cfg.pixel_size)
 
 
 def init_path_from_cfg(cfg: Config):
@@ -139,10 +139,11 @@ def init_path_from_cfg(cfg: Config):
 def init_well_info():
 	global well_size, xy_well_info
 
-	well_size_file = open(path_well_size, 'r').readlines()
-	well_size = int(well_size_file[0].split()[0])
+	# well_size_file = open(path_well_size, 'r').readlines()
+	# well_size = int(well_size_file[0].split()[0])
 
 	xy_well_file = open(path_well_info, 'r').readlines()
+	well_size = int(len(xy_well_file)) - 1
 	xy_well_info = np.zeros(well_size, dtype = Well)
 
 	for i in range(well_size):
@@ -158,7 +159,7 @@ def init_bound_info():
 	index_size = 0
 
 	for i in range(len(xy_bound_file)):
-		if xy_bound_file[i].rstrip() == '$4 Что считать нулём':
+		if xy_bound_file[i].rstrip() == '$4 Что считать нулём':#исправить чтобы читался только параграф $4
 			index_size = i
 			break
 
@@ -206,9 +207,9 @@ def init_well_ellipse_info():
 
 	xy_well_ellipse_array = [
 		((xy_well_info[i].x - xy_well_info[i].r - x_0) * (pixel_max - 1) / norm_xy,
-			(xy_well_info[i].y - xy_well_info[i].r - y_0) * (pixel_max - 1) / norm_xy,
-			(xy_well_info[i].x + xy_well_info[i].r - x_0) * (pixel_max - 1) / norm_xy,
-			(xy_well_info[i].y + xy_well_info[i].r - y_0) * (pixel_max - 1) / norm_xy) for i in range(well_size)]
+		 (xy_well_info[i].y - xy_well_info[i].r - y_0) * (pixel_max - 1) / norm_xy,
+		 (xy_well_info[i].x + xy_well_info[i].r - x_0) * (pixel_max - 1) / norm_xy,
+		 (xy_well_info[i].y + xy_well_info[i].r - y_0) * (pixel_max - 1) / norm_xy) for i in range(well_size)]
 
 
 def init_sl_info():
@@ -225,7 +226,7 @@ def init_sl_info():
 		sl = SL(sl_file_input)
 		sl.xy = [
 			((float(sl_file[2 + num + i + j].split()[0]) - x_0) * (pixel_max - 1) / norm_xy,
-				(float(sl_file[2 + num + i + j].split()[1]) - y_0) * (pixel_max - 1) / norm_xy) for j in range(sl.Np)]
+			 (float(sl_file[2 + num + i + j].split()[1]) - y_0) * (pixel_max - 1) / norm_xy) for j in range(sl.Np)]
 		num += sl.Np
 		fft.append((sl.WellFrom, sl.WellTo))
 		sl.FT = [sl.WellFrom, sl.WellTo]
@@ -257,12 +258,14 @@ def init_nonrepeating_color():
 
 
 def create_rectangle():
-	global img, idraw
+	global img, idraw, nx_pixel_max, ny_pixel_max
 	dobavok = 1
-	img = Image.new('RGB', (int(lx_norm * pixel_max) + dobavok, int(ly_norm * pixel_max) + dobavok), (0, 0, 1))
+	img = Image.new('RGB', (int(lx_norm * pixel_max) + dobavok, int(ly_norm * pixel_max) + dobavok), (0, 0, 2))
+	nx_pixel_max = int(lx_norm * pixel_max) + dobavok
+	ny_pixel_max = int(ly_norm * pixel_max) + dobavok
 	idraw = ImageDraw.Draw(img)
 	# idraw.line(xy_bound_array, fill = 'black', width = 1)
-	idraw.polygon(xy_bound_array, fill = (255, 255, 255), outline = (0, 0, 0))
+	idraw.polygon(xy_bound_array, fill = (255, 255, 255), outline = (0, 0, 2))
 
 
 def create_well(color):
@@ -285,7 +288,8 @@ def create_st():
 			idraw.line(sl_info[i].xy, fill = sl_color)
 
 	create_well(sl_color)
-
+	s = 0
+	st_t = time.time()
 	for i in range(n_sl):
 		for j in range(int(sl_info[i].Np / 2) - 1, int(sl_info[i].Np / 2)):
 			x1 = sl_info[i].xy[j][0]
@@ -296,18 +300,27 @@ def create_st():
 			if list(img.getpixel((xp[0][0], xp[0][1]))) == [0, 0, 0]:
 				continue
 			elif list(img.getpixel((xp[0][0], xp[0][1]))) == [255, 255, 255]:
+				start_time = time.time()
 				ImageDraw.floodfill(img, (xp[0][0], xp[0][1]), sl_info[i].color, border = None, thresh = 0.5)
+				s = s + time.time() - start_time
 			elif list(img.getpixel((xp[0][0], xp[0][1]))) != list(sl_info[i].color):
+				start_time = time.time()
 				ImageDraw.floodfill(img, (xp[0][0], xp[0][1]), (0, 0, 0), border = None, thresh = 0.5)
+				s = s + time.time() - start_time
 			if list(img.getpixel((xp[1][0], xp[1][1]))) == [0, 0, 0]:
 				continue
 			elif list(img.getpixel((xp[1][0], xp[1][1]))) == [255, 255, 255]:
+				start_time = time.time()
 				ImageDraw.floodfill(img, (xp[1][0], xp[1][1]), sl_info[i].color, border = None, thresh = 0.5)
+				s = s + time.time() - start_time
 			elif list(img.getpixel((xp[1][0], xp[1][1]))) != list(sl_info[i].color):
+				start_time = time.time()
 				ImageDraw.floodfill(img, (xp[1][0], xp[1][1]), (0, 0, 0), border = None, thresh = 0.5)
-
+				s = s + time.time() - start_time
+	print('time function create_st() : ', time.time() - st_t)
+	print('time function flooddill() : ', s)
 	create_sl()
-	create_well((0, 0, 0))
+	create_well((0, 0, 1))
 
 
 # font = ImageFont.truetype("Fonts/times.ttf", int(pixel_max / 20))
@@ -318,10 +331,11 @@ def create_st():
 def path_pic_well_conn_and_color_info(path):
 	file = open(path, 'w')
 	file.write('###' + '\t' + 'Wells connection(color) info' + '\t' + '###' + '\n')
-	file.write('Size' + '\t' + str(len(clr) + 3) + '\n')
+	file.write('Size' + '\t' + str(len(clr) + 4) + '\n')
 	file.write('#Color            #Connection' + '\n')
 	file.write('{:<15}'.format('(0, 0, 0)') + '\t' + '{:<15}'.format('(-999999999, -999999999)') + '\n')
 	file.write('{:<15}'.format('(0, 0, 1)') + '\t' + '{:<15}'.format('(+999999999, -999999999)') + '\n')
+	file.write('{:<15}'.format('(0, 0, 2)') + '\t' + '{:<15}'.format('(-999999999, +999999999)') + '\n')
 	file.write('{:<15}'.format('(255, 255, 255)') + '\t' + '{:<15}'.format('(+999999999, +999999999)') + '\n')
 	for i in range(len(clr)):
 		file.write('{:<15}'.format(str(clr[i])) + '\t' + '{:<15}'.format(str(ft[i])))
@@ -329,35 +343,66 @@ def path_pic_well_conn_and_color_info(path):
 
 
 def get_params(config):
-	init_pixel_size()
+	init_pixel_size(config)
 	init_path_from_cfg(config)
 	init_bound_info()
 	return [pixel_max, x_0, y_0, norm_xy]
 
 
+def well_info_file(path):
+	file = open(path + '\well_info.txt', 'w')
+	strs = f'index\twell_name\ttype\tx\ty\tr\tpress\tq\n'
+	for i in range(len(xy_well_info)):
+		strs = strs + f'{xy_well_info[i].index}\t{xy_well_info[i].name}\t{xy_well_info[i].type}\t{xy_well_info[i].x}\t{xy_well_info[i].y}\t{xy_well_info[i].r}\t{xy_well_info[i].press}\t{xy_well_info[i].rate}\n'
+	file.write(strs)
+	file.close()
+	file_prod = open(path + '\well_prod_info.txt', 'w')
+	file_inj = open(path + '\well_inj_info.txt', 'w')
+	file_nowork = open(path + '\well_nowork_info.txt', 'w')
+	strs_prod = f'index\twell_name\ttype\tx\ty\tr\tpress\tq\n'
+	strs_inj = f'index\twell_name\ttype\tx\ty\tr\tpress\tq\n'
+	strs_nowork = f'index\twell_name\ttype\tx\ty\tr\tpress\tq\n'
+	for i in range(len(xy_well_info)):
+		if xy_well_info[i].type == 'producer':
+			strs_prod = strs_prod + f'{xy_well_info[i].index}\t{xy_well_info[i].name}\t{xy_well_info[i].type}\t{xy_well_info[i].x}\t{xy_well_info[i].y}\t{xy_well_info[i].r}\t{xy_well_info[i].press}\t{xy_well_info[i].rate}\n'
+		elif xy_well_info[i].type == 'injection':
+			strs_inj = strs_inj + f'{xy_well_info[i].index}\t{xy_well_info[i].name}\t{xy_well_info[i].type}\t{xy_well_info[i].x}\t{xy_well_info[i].y}\t{xy_well_info[i].r}\t{xy_well_info[i].press}\t{xy_well_info[i].rate}\n'
+		elif xy_well_info[i].type == 'no_working':
+			strs_nowork = strs_nowork + f'{xy_well_info[i].index}\t{xy_well_info[i].name}\t{xy_well_info[i].type}\t{xy_well_info[i].x}\t{xy_well_info[i].y}\t{xy_well_info[i].r}\t{xy_well_info[i].press}\t{xy_well_info[i].rate}\n'
+	file_prod.write(strs_prod)
+	file_inj.write(strs_inj)
+	file_nowork.write(strs_nowork)
+	file_prod.close()
+	file_inj.close()
+	file_nowork.close()
+
+
 def create_image(config):
 	global img, idraw
-	init_pixel_size()
+	init_pixel_size(config)
 	init_path_from_cfg(config)
 	init_well_info()
 	init_bound_info()
 	init_well_ellipse_info()
 	init_sl_info()
 	create_rectangle()
-	# init_nonrepeating_color()
 	create_sl()
-	create_well((0, 0, 0))
-	img.show()
+	create_well((0, 0, 1))
+	# init_nonrepeating_color()
+	# img.show()
 	if not os.path.isdir(path_folder):
 		os.mkdir(path_folder)
 	img.save(path_save_SL)
 	create_st()
-	img.show()
+	# img.show()
 	img.save(path_save_ST)
 	path_pic_well_conn_and_color_info(path_save)
+	well_info_file(config.path_folder_save)
 
 
 if __name__ == '__main__':
-	raise SystemExit("ImageCreate.py это не основное приложение!")
+	print('ImageCreate.py Используется как исполняемый файл!')
+	create_image(read_xml_config())
+	# raise SystemExit("ImageCreate.py это не основное приложение!")
 else:
 	print('ImageCreate.py Используется как библиотека!')

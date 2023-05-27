@@ -1,48 +1,110 @@
 import numpy as np
+from PIL import Image
+
+from grid import *
+from GeneralClassAndFunction import Config
+from GeneralClassAndFunction import read_xml_config
+from CalcParam import calc_all_params, calc_t_param
+import time
 
 
-def integral_jacob(grid):
-	j = np.zeros(grid.Nelem)
-	for i in range(grid.Nelem):
-		x1 = grid.vert[grid.elem_vert[i][0]][0]
-		y1 = grid.vert[grid.elem_vert[i][0]][1]
-		x2 = grid.vert[grid.elem_vert[i][1]][0]
-		y2 = grid.vert[grid.elem_vert[i][1]][1]
-		x3 = grid.vert[grid.elem_vert[i][2]][0]
-		y3 = grid.vert[grid.elem_vert[i][2]][1]
-		j[i] = ((x2 - x1) * (y3 - y1) - (x3 - x1) * (y2 - y1)) / 2
-	return j
+grid = None
+fieldd = None
+pic = None
+clr = []
+cfg: Config
 
 
-def integrate_by_st_vert(grid, color, jacob, field):
-	integral_color = np.zeros(len(color))
+class Color:
+	def __init__(self, st):
+		c = st[0].rstrip().replace('(', '').replace(')', '').replace(' ', '').split(',')
+		r = int(c[0])
+		g = int(c[1])
+		b = int(c[2])
+		self.color = (r, g, b)
+		d = st[1].rstrip().replace('(', '').replace(')', '').replace(' ', '').split(',')
+		f = int(d[0])
+		t = int(d[1])
+		self.ft = (f, t)
 
-	for i in range(grid.Nelem):
-		for j in range(grid.elem_nvert[i]):
-			for k in range(len(color)):
-				if grid.vert_color[grid.elem_vert[i][j]] == list(color[k].color):
-					f = (field[grid.elem_vert[i][0]] + field[grid.elem_vert[i][1]] + field[grid.elem_vert[i][2]]) / 3
-					integral_color[k] = integral_color[k] + (jacob[i] * f) / 3
 
-	return integral_color
+def read_pic(path):
+	global pic
+	pic = Image.open(path)
 
 
-def integrate_by_st_vem(grid, color, jacob, field, field_u, ku):
-	integral_color = np.zeros(len(color))
-	for i in range(grid.Nelem):
-		if field_u[i] - ku * np.median(field_u) > 0:
-			for j in range(grid.elem_nvert[i]):
-				for k in range(len(color)):
-					if grid.vert_color[grid.elem_vert[i][j]] == list(color[k].color):
-						f = (field[grid.elem_vert[i][0]] + field[grid.elem_vert[i][1]] + field[grid.elem_vert[i][2]]) / 3
-						integral_color[k] = integral_color[k] + (jacob[i] * f) / 3
-		else:
-			continue
+def read_ppwcac_info(path):
+	global clr
 
-	return integral_color
+	ppwcfc_file = open(path, 'r').readlines()
+	ncolor = int(ppwcfc_file[1].split()[1])
+	clr = np.zeros(ncolor, dtype = Color)
+	for i in range(ncolor):
+		clr[i] = Color(ppwcfc_file[i + 3].split('\t'))
+
+
+def read_mesh(path):
+	global grid
+	grid = gu_build_from_net(path)
+
+
+def init_color_to_vert():
+	assigment_color_to_vert(grid, pic, cfg)
+
+
+def output_file_param(data, path):
+	file = open(path, 'w')
+	file.write(
+		'###' + '\t' + 'st_number' + '\t' + 'Well_From' + '\t' + 'Well_To' + '\t' + 'Color_R' + '\t' + 'Color_G' + '\t'
+		+ 'Color_B' + '\t' + 'value' + '\n')
+	file.write('##Size' + '\t' + str(len(data)) + '\n')
+	for i in range(len(data)):
+		file.write(
+			'{:<}'.format(str(i)) + '\t' + '{:<}'.format(str(clr[i].ft[0])) + '\t' + '{:<}'.format((str(clr[i].ft[1])))
+			+ '\t' + '{:<}'.format(str(clr[i].color[0])) + '\t' + '{:<}'.format(str(clr[i].color[1])) + '\t'
+			+ '{:<}'.format(str(clr[i].color[2])) + '\t' + '{:<}'.format(str(data[i])) + '\n')
+	file.close()
+
+
+def output_file_params(data, path):
+	n_data = len(data)
+	file = open(path, 'w')
+	strs = '###' + 'st_number' + '\t' + 'Well_From' + '\t' + 'Well_To' + '\t' + 'Color_R' + '\t' + 'Color_G' + '\t' \
+			 + 'Color_B'
+	for i in range(n_data):
+		strs = strs + '\t' + data[i][0]
+	strs = strs + '\n'
+	len_data_i = len(data[0][1])
+	strs = strs + '##Size' + '\t' + str(len_data_i) + '\n'
+	for i in range(len_data_i):
+		strs = strs + '{:<}'.format(str(i)) + '\t' + '{:<}'.format(str(clr[i].ft[0])) + '\t' + '{:<}'.format((str(clr[i].ft[1]))) \
+					+ '\t' + '{:<}'.format(str(clr[i].color[0])) + '\t' + '{:<}'.format(str(clr[i].color[1])) + '\t' \
+					+ '{:<}'.format(str(clr[i].color[2]))
+		for j in range(n_data):
+			strs = strs + '\t' + '{:<}'.format(str(data[j][1][i]))
+		strs = strs + '\n'
+	file.write(strs)
+	file.close()
+
+
+def integrate_st(config):
+	global cfg
+	start_time = time.time()
+	cfg = config
+	read_pic(cfg.path_save_picture_ST)
+	read_ppwcac_info(cfg.path_save_color_and_conn_info)
+	read_mesh(cfg.path_default_net)
+	init_color_to_vert()
+	output_infos = calc_all_params(cfg.path_relative_folder, grid, clr, cfg)
+	output_file_params(output_infos, cfg.path_save_st_Well_From_To_colorRGB_value)
+	output_infos_t = calc_t_param(cfg.path_relative_folder, grid, clr, cfg)
+	output_file_params(output_infos_t, cfg.path_folder_save + 't_table.txt')
+	print('integrate_st() function time : ', time.time() - start_time)
 
 
 if __name__ == '__main__':
-	raise SystemExit("IntegratorST.py это не основное приложение!")
+	# raise SystemExit("IntegratorST.py это не основное приложение!")
+	print('IntegratorST.py Используется как исполняемый файл!')
+	integrate_st(read_xml_config())
 else:
 	print('IntegratorST.py Используется как библиотека!')

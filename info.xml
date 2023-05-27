@@ -1,23 +1,26 @@
 <?xml version="1.0"?>
 <config>
-	<pixel_size>1000</pixel_size> <!-- Максимальное кол-во пикселей по большей стороне изображения -->
-	<ku>0.1</ku><!-- Коэффициент для подсчета u* = ku * mediane(u)  -->
-	<relative_path name="relative_path_for_files">C:\Stud\ST_LT\SL_ST_EXAMPLE\Ex2\</relative_path> <!-- Относительный путь из которого будут считываться файлы из file_names -->
-	<file_names> <!-- Названия файлов для считывания -->
-		<file_name name="name_file_default_wells.dat">default_wells.dat</file_name> <!-- Название файла для считывания кол-ва скважин -->
-		<file_name name="name_file_result.wll">result.wll</file_name> <!-- Название файла для считывания координат отнесенным к узлам сетки -->
-		<file_name name="name_file_default.con">default.con</file_name> <!-- Название файла для считывания координат контура -->
-		<file_name name="name_file_SLsReg_auto.txt">SL_ST_PROD\SLsReg_auto.txt</file_name> <!-- Название файла для считывания информации о линиях тока -->
-		<file_name name="name_file_default.net">default.net</file_name> <!-- Название файла для считывания информации о сетке -->
-		<file_name name="name_file_result.fun">result.fun</file_name> <!-- Название файла для считывания информации о поле в узлах -->
-		<file_name name="name_file_resvelo.vel">resvelo.vel</file_name> <!-- Название файла для считывания информации о поле в конечных эдементах -->
+	<pixel_size>4879</pixel_size>
+	<ku>0.1</ku>
+	<mu_water>0.001</mu_water>
+	<mu_oil>0.001</mu_oil>
+	<path_rel_perm>.....</path_rel_perm>
+	<relative_path name="relative_path_for_files">C:\Stud\ST_LT\SL_ST_EXAMPLE\Sarapal_ST_Integrate_test\</relative_path>
+	<file_names>
+		<file_name name="name_file_default_wells.dat">wells.dat</file_name>
+		<file_name name="name_file_result.wll">result.wll</file_name>
+		<file_name name="name_file_default.con">finemesh.con</file_name>
+		<file_name name="name_file_SLsReg_auto.txt">Result\SL_ST_PROD\SLsReg_auto.txt</file_name>
+		<file_name name="name_file_default.net">finemesh.net</file_name>
+		<file_name name="name_file_result.fun">result.fun</file_name>
+		<file_name name="name_file_resvelo.vel">resvelo.vel</file_name>
 	</file_names>
-	<relative_path_for_save name="relative_path_for_save">C:\Stud\ST_LT\Color_ST_Integrate\</relative_path_for_save>
-	<folder_name_for_save>Result</folder_name_for_save> <!-- Название папки которая будет создана в директории relative_path-->
-	<file_names_for_save> <!-- Названия файлов для сохранения выходных или промежуточных данных -->
-		<file_name_save name="picture_SL">Pic_SL.png</file_name_save> <!-- Название файла для сохранения изображения с линиями тока -->
-		<file_name_save name="picture_ST">Pic_ST.png</file_name_save> <!-- Название файла для сохранения изображения с трубками тока(ТТ) -->
-		<file_name_save name="color_and_conn_info">ppwcac_info.txt</file_name_save> <!-- Название файла для сохранения зависимости цвета и взаимодействующих скважин WellFrom -> WellTo -->
-		<file_name_save name="st_Well_From_To_colorRGB_value">st_ft_color_value.txt</file_name_save> <!-- Название файла для сохранения №ТТ WellFrom WellTo Color_R Color_G Color_B value-->
+	<relative_path_for_save name="relative_path_for_save">C:\Stud\ST_LT\SL_ST_EXAMPLE\Sarapal_ST_Integrate_test\</relative_path_for_save>
+	<folder_name_for_save>Color_ST_analiz</folder_name_for_save>
+	<file_names_for_save>
+		<file_name_save name="picture_SL">Pic_SL.png</file_name_save>
+		<file_name_save name="picture_ST">Pic_ST.png</file_name_save>
+		<file_name_save name="color_and_conn_info">ppwcac_info.txt</file_name_save> 
+		<file_name_save name="st_Well_From_To_colorRGB_value">st_ft_color_value.txt</file_name_save>
 	</file_names_for_save>
 </config>

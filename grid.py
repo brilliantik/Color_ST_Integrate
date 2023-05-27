@@ -324,4 +324,4 @@ def assigment_color_to_vert(grid, img, config):
 if __name__ == '__main__':
 	raise SystemExit('grid.py это не основное приложение!')
 else:
-	print('grid.py используется как библиотека!')
+	print('grid.py Используется как библиотека!')
